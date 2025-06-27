@@ -41,7 +41,7 @@ public class QueteRegisters
 
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-			QueteUpdate.update(player, eventType, config, itemBuilder, (material != null ? material.name() : entityType.name()), slot, event);
+			QueteUpdate.update(player, eventType, config, itemBuilder, (material != null) ? material.name() : entityType.name(), slot, event);
 		}
 	}
 }

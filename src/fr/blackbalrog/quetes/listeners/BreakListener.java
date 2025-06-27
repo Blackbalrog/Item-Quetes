@@ -1,6 +1,7 @@
 package fr.blackbalrog.quetes.listeners;
 
 import org.bukkit.Material;
+import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -36,14 +37,14 @@ public class BreakListener implements Listener
 
 			if (type == Material.WHEAT || type == Material.CARROTS || type == Material.POTATOES || type == Material.BEETROOTS || type == Material.NETHER_WART)
 			{
-				if (breakEvent.getBlock().getBlockData() instanceof org.bukkit.block.data.Ageable ageable)
+				if (breakEvent.getBlock().getBlockData() instanceof Ageable ageable)
 				{
-					return ageable.getAge() == ageable.getMaximumAge() ? type : null;
+					return ageable.getAge() == ageable.getMaximumAge() ? type : Material.AIR;
 				}
 			}
 			if (type == Material.SUGAR_CANE || type == Material.CACTUS)
 			{
-				return breakEvent.getBlock().getRelative(0, 1, 0).getType() == type ? type : null;
+				return breakEvent.getBlock().getRelative(0, 1, 0).getType() == type ? type : Material.AIR;
 			}
 			return type;
 		}
