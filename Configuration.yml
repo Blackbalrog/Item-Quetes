@@ -1,0 +1,8 @@
+Prefix: "&8[&6Quetes&8] "
+
+Title:
+  Actived: true
+  Timer:
+    fadeIn: 2 
+    stay: 5
+    fadeOut: 2

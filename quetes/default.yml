@@ -1,0 +1,45 @@
+Item:
+  material: PAPER
+  name: "&bdefault"
+
+
+# event = BREAK, ENCHANT, FISHING, HARVEST, KILL
+# type si event =
+# 				FISHING: ALL, COD, SALMON, PUFFERFISH, TROPICAL_FISH, ...
+#				KILL: ALL, PLAYER, COW, PIG, ZOMBIE,  ...
+# 				ENCHANT: ALL, ...
+# 				BREAK: ALL, STONE, GRASS, ...
+
+
+Quetes:
+  0:
+    name: "Cassez 10 pierres"
+    event: BREAK
+    type: STONE
+    count: 10
+  1:
+    name: "Enchantez 10 livres"
+    event: ENCHANT
+    type: ALL
+    count: 10
+  2:
+    name: "Pêchez 10 morues"
+    event: FISHING
+    type: COD
+    count: 10
+  3:
+    name: "Récoltez 10 blées"
+    event: BREAK
+    type: WHEAT
+    count: 10
+  4:
+    name: "Tuez 10 cochons"
+    event: KILL
+    type: PIG
+    count: 10
+    
+Rewards:
+  0:
+    name: "&bPierre lisse"
+    material: STONE
+    count: 1

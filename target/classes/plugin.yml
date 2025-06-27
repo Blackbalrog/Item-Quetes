@@ -1,0 +1,14 @@
+name: Quetes
+version: 1.0.0
+main: fr.blackbalrog.quetes.Quetes
+description: Plugin de Quetes
+author: [Blackbalrog]
+api-version: 1.13
+
+commands:
+  quetes:
+    description: permet de se give l item
+
+permissions:
+  quetes.command.give:
+    description: permet de taper la commande quetes give 
