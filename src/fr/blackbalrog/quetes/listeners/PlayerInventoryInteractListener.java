@@ -57,72 +57,25 @@ public class PlayerInventoryInteractListener implements Listener
 				{
 					listQuetes.clear();
 					loreFinal.clear();
-					boolean foundCurrent = false;
-	
+					
+					int countQueteFinish = 0;
+					
 					for (String id : configuration.getConfigurationSection("Quetes").getKeys(false))
 					{
 						if (itemBuilder.getIntTag("quete_" + id) == configuration.getInt("Quetes." + id + ".count"))
 						{
-							new InventoryRewards().openInventory(player, configuration);
-							return;
-						}
-						
-						ConfigurationSection section = configuration.getConfigurationSection("Quetes." + id);
-						int count = section.getInt("count");
-						int progress = itemBuilder.getIntTag("quete_" + id);
-						String name = section.getString("name").replaceAll("&", "§");
-	
-						if (progress >= count)
-						{
-							listQuetes.add("§7§m" + name + ": " + count);
-							continue;
-						}
-	
-						if (!foundCurrent)
-						{
-							foundCurrent = true;
-	
-							if (progress == count)
-							{
-								listQuetes.add("§7§m" + name + ": " + count);
-	
-								try
-								{
-									int nextId = Integer.parseInt(id) + 1;
-									if (configuration.contains("Quetes." + nextId))
-									{
-										itemBuilder.setIntTag("quete_" + nextId, 0);
-									}
-								}
-								catch (NumberFormatException exception)
-								{
-									exception.printStackTrace();
-								}
-							}
-							else
-							{
-								listQuetes.add("§a§l" + name + ": §b" + progress);
-							}
-						}
-						else
-						{
-							listQuetes.add("§7???");
+							countQueteFinish++;
 						}
 					}
-	
-					loreFinal.addAll(lores);
-					loreFinal.addAll(listQuetes);
-					loreFinal.add("");
-					loreFinal.add("");
-					loreFinal.add("§eClique gauche:");
-					loreFinal.add("§7Une fois toutes les quêtes terminer,");
-					loreFinal.add("§7Vous pourrez ouvrir l'inventaire des récompenses");
-					loreFinal.add("");
-					loreFinal.add("§aClique droit: §7Pour déplacer l'item");
-	
-					itemBuilder.setLores(loreFinal).build();
-					event.getClickedInventory().setItem(event.getSlot(), itemBuilder.getItemStack());
-					return;
+					
+					if (countQueteFinish == configuration.getConfigurationSection("Quetes").getKeys(false).size())
+					{
+						new InventoryRewards().openInventory(player, configuration);
+					}
+					else
+					{
+						player.sendMessage(this.prefix + "§7Vous n'avez pas terminer les quêtes");
+					}
 				}
 				else
 				{

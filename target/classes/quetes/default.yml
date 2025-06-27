@@ -17,6 +17,7 @@ Quetes:
     event: BREAK
     type: STONE
     count: 10
+    noDrop: true
   1:
     name: "Enchantez 10 livres"
     event: ENCHANT
