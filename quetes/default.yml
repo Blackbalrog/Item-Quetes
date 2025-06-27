@@ -9,7 +9,13 @@ Item:
 #				KILL: ALL, PLAYER, COW, PIG, ZOMBIE,  ...
 # 				ENCHANT: ALL, ...
 # 				BREAK: ALL, STONE, GRASS, ...
-
+#
+#
+# (Mob ageable)
+# age:
+#   filter =
+# 			ADULTE
+# 			BABY
 
 Quetes:
   0:
@@ -18,11 +24,17 @@ Quetes:
     type: STONE
     count: 10
     noDrop: true
+    reward:
+      name: "&6Stone"
+      material: "STONE"
+      count: 1
   1:
     name: "Enchantez 10 livres"
     event: ENCHANT
     type: ALL
     count: 10
+    rewards:
+      - "STONE:1:&bTest"
   2:
     name: "Pêchez 10 morues"
     event: FISHING
@@ -37,6 +49,8 @@ Quetes:
     name: "Tuez 10 cochons"
     event: KILL
     type: PIG
+    age:
+      filter: ADULTE
     count: 10
     
 Rewards:

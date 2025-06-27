@@ -6,6 +6,7 @@ import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -48,22 +49,76 @@ public class QueteUpdate
 
 			if (progress >= required) continue;
 
+			if (section.isConfigurationSection("age"))
+			{
+				ConfigurationSection ageSection = section.getConfigurationSection("age");
+
+				if (event instanceof EntityDeathEvent deathEvent)
+				{
+					if (deathEvent.getEntity() instanceof Ageable ageable)
+					{
+						String filter = ageSection.getString("filter");
+						boolean isAdult = ageable.isAdult();
+
+						if ((filter.equalsIgnoreCase("ADULTE") && !isAdult) || (filter.equalsIgnoreCase("BABY") && isAdult))
+						{
+							return;
+						}
+					}
+				}
+			}
+			
 			progress++;
 			itemBuilder.setIntTag("quete_" + id, progress);
 
 			List<String> newLore = UpdateItemLore.update(itemBuilder, fileConfiguration);
 			itemBuilder.setLores(newLore);
 			itemBuilder.build();
-
+			
 			player.getInventory().setItem(slot, itemBuilder.getItemStack());
 			player.updateInventory();
 			
-			if (progress == required && configuration.getBoolean("Title.Actived"))
+			if (progress == required)
 			{
-				player.sendTitle("§aFélicitations", "§7Quête terminée", 
-						configuration.getInt("Title.Timer.fadeIn"), 
-						configuration.getInt("Title.Timer.stay"), 
-						configuration.getInt("Title.Timer.fadeOut"));
+				if (configuration.getBoolean("Title.Actived"))
+				{
+					player.sendTitle("§aFélicitations", "§7Quête terminée", 
+							configuration.getInt("Title.Timer.fadeIn"), 
+							configuration.getInt("Title.Timer.stay"), 
+							configuration.getInt("Title.Timer.fadeOut"));
+				}
+				
+				if (section.contains("reward"))
+				{
+					ConfigurationSection sectionReward = section.getConfigurationSection("reward");
+					ItemBuilder itemReward = new ItemBuilder(Material.valueOf(sectionReward.getString("material")));
+					itemReward.setName(sectionReward.getString("name").replaceAll("&", "§"))
+						.setAmount(sectionReward.getInt("count"))
+						.build();
+					player.getInventory().addItem(itemReward.getItemStack());
+				}
+				
+				if (section.contains("rewards"))
+				{
+					for (String reward : section.getStringList("rewards"))
+					{
+						String[] blockLine = reward.split(":");
+						
+						/**
+						 * args[0] = material
+						 * args[1] = amount
+						 * args[2] = name
+						 * 
+						 * - "STONE:1:&bTest"
+						 */
+						
+						ItemBuilder itemReward = new ItemBuilder(Material.valueOf(blockLine[0]));
+						itemReward.setName(blockLine[2].replaceAll("&", "§"))
+							.setAmount(Integer.parseInt(blockLine[1]))
+							.build();
+						player.getInventory().addItem(itemReward.getItemStack());
+					}
+				}
 			}
 
 			if (allQuetesCompleted(itemBuilder, questsSection))
