@@ -13,7 +13,7 @@ import fr.blackbalrog.quetes.handle.QueteRegisters;
 
 public class BreakListener implements Listener
 {
-	
+
 	private QueteHandler handler = new QueteHandler()
 	{
 		@Override
@@ -31,7 +31,21 @@ public class BreakListener implements Listener
 		@Override
 		public Material getMaterial(Event event)
 		{
-			return ((BlockBreakEvent) event).getBlock().getType();
+			BlockBreakEvent breakEvent = (BlockBreakEvent) event;
+			Material type = breakEvent.getBlock().getType();
+
+			if (type == Material.WHEAT || type == Material.CARROTS || type == Material.POTATOES || type == Material.BEETROOTS || type == Material.NETHER_WART)
+			{
+				if (breakEvent.getBlock().getBlockData() instanceof org.bukkit.block.data.Ageable ageable)
+				{
+					return ageable.getAge() == ageable.getMaximumAge() ? type : null;
+				}
+			}
+			if (type == Material.SUGAR_CANE || type == Material.CACTUS)
+			{
+				return breakEvent.getBlock().getRelative(0, 1, 0).getType() == type ? type : null;
+			}
+			return type;
 		}
 
 		@Override
@@ -39,14 +53,14 @@ public class BreakListener implements Listener
 		{
 			return null;
 		}
-		
+
 		@Override
 		public String getEventType()
 		{
 			return "BREAK";
 		}
 	};
-	
+
 	@EventHandler
 	public void onBreak(BlockBreakEvent event)
 	{

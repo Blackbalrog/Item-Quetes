@@ -18,9 +18,6 @@ import fr.blackbalrog.quetes.builder.ItemBuilder;
 
 public class InventoryRewards implements Listener
 {
-
-	private String prefix = Quetes.getInstance().getPrefix();
-	
 	public void openInventory(Player player, FileConfiguration configuration)
 	{
 		ConfigurationSection rewardsSection = configuration.getConfigurationSection("Rewards");
