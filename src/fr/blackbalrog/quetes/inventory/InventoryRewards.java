@@ -41,42 +41,29 @@ public class InventoryRewards implements Listener
 	}
 
 	@EventHandler
-	public void onInventoryClick(InventoryClickEvent event)
+	public void onInventoryClick2(InventoryClickEvent event)
 	{
 		Player player = (Player) event.getWhoClicked();
-
-		if (!event.getView().getTitle().equals("Récompenses")) return;
-
-		if (event.getClickedInventory() != null && event.getClickedInventory().equals(event.getView().getTopInventory()))
+		ItemStack item = event.getCurrentItem();
+		
+		if (event.getView().getTitle().equals("Récompenses"))
 		{
-			if (event.getAction().toString().contains("PLACE") || event.getAction().toString().contains("SWAP"))
-			{
-				event.setCancelled(true);
-			}
-		}
-
-		Bukkit.getScheduler().runTaskLater(Quetes.getInstance(), () -> {
-			Inventory inv = event.getView().getTopInventory();
-			boolean isEmpty = true;
-
-			for (ItemStack item : inv.getContents())
-			{
-				if (item != null && item.getType() != Material.AIR)
-				{
-					isEmpty = false;
-					break;
-				}
-			}
-
-			if (isEmpty)
+			if (item == null || event.getClickedInventory() == null) return;
+			event.setCancelled(true);
+		
+			player.getInventory().addItem(item);
+			
+			Inventory inventory = event.getInventory();
+			inventory.remove(item);
+			
+			if (inventory.isEmpty())
 			{
 				for (int i = 0; i < player.getInventory().getSize(); i++)
 				{
-					ItemStack item = player.getInventory().getItem(i);
-					if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName())
+					ItemStack itemQuete = player.getInventory().getItem(i);
+					if (itemQuete != null && itemQuete.hasItemMeta() && itemQuete.getItemMeta().hasDisplayName())
 					{
-						String name = item.getItemMeta().getDisplayName().replaceAll("§.", "");
-						File file = new File(Quetes.getInstance().getDataFolder(), "quetes/" + name + ".yml");
+						File file = new File(Quetes.getInstance().getDataFolder(), "quetes/" + itemQuete.getItemMeta().getDisplayName().replaceAll("§.", "") + ".yml");
 						if (file.exists())
 						{
 							player.getInventory().setItem(i, null);
@@ -84,9 +71,8 @@ public class InventoryRewards implements Listener
 						}
 					}
 				}
-				player.closeInventory();
-				player.sendMessage(this.prefix + "§7Tu as récupéré toutes tes récompenses !");
 			}
-		}, 1L);
+			player.closeInventory();
+		}
 	}
 }

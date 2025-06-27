@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -70,7 +71,9 @@ public class PlayerInventoryInteractListener implements Listener
 					
 					if (countQueteFinish == configuration.getConfigurationSection("Quetes").getKeys(false).size())
 					{
-						new InventoryRewards().openInventory(player, configuration);
+						Bukkit.getScheduler().runTaskLater(Quetes.getInstance(), () -> {
+							new InventoryRewards().openInventory(player, configuration);
+						}, 1L);
 					}
 					else
 					{
