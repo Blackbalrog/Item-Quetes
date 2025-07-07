@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -11,16 +12,19 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import fr.blackbalrog.quetes.Quetes;
 import fr.blackbalrog.quetes.builder.ItemBuilder;
+import fr.blackbalrog.quetes.message.Console;
 
 public class CommandQuetes implements CommandExecutor, TabCompleter
 {
 
+	private Console console = Quetes.getInstance().getConsole();
 	private String prefix = Quetes.getInstance().getPrefix();
 	
 	@Override
@@ -38,7 +42,9 @@ public class CommandQuetes implements CommandExecutor, TabCompleter
 			if (args[0].equalsIgnoreCase("reload"))
 			{
 				Quetes.getInstance().getConfigurationManager().reloadConfigurations();
-				sender.sendMessage(this.prefix + "§7La configuration a été reload");
+				Quetes.getInstance().getQueteConfiguration().reloadAll();
+				Quetes.getInstance().getQueteConfiguration().init();
+				sender.sendMessage(this.prefix + "§7Les configurations ont été recharger");
 				return true;
 			}
 		}
@@ -73,8 +79,51 @@ public class CommandQuetes implements CommandExecutor, TabCompleter
 							"§7Cliquez sur le parchemin pour activer §bles quêtes", 
 							"", 
 							"§eClique gauche: §7pour activer le parchemin",
-							"§aClique droit: §7Pour déplacer l'item"))
-					.build();
+							"§aClique droit: §7Pour déplacer l'item"));
+				
+				int slot = 0;
+				if (configuration.contains("Rewards.Inventory"))
+				{
+					Random random = new Random();
+					
+					for (String key : configuration.getConfigurationSection("Rewards.Inventory").getKeys(false))
+					{
+						ConfigurationSection section = configuration.getConfigurationSection("Rewards.Inventory." + key);
+						
+						String name = section.getString("name");
+						
+						if (name == null || name.isEmpty())
+						{
+							name = "default";
+							this.console.setError("Le nom du slot Rewards '" + key + "' du fichier '" + configuration.getName() + ".yml' n'éxiste pas");
+						}
+						
+						Material material = Material.matchMaterial(section.getString("material"));
+						if (material == null)
+						{
+							material = Material.PINK_PETALS;
+							this.console.setError("Le material du slot Rewards '" + key + "' du fichier '" + configuration.getName() + ".yml' n'éxiste pas");
+						}
+						
+						int amount = section.getInt("count");
+						if (amount <= -1)
+						{
+							amount = 1;
+						}
+						
+						if (section.contains("pourcent"))
+						{
+							if (random.nextInt(100) + 1 > section.getInt("pourcent")) continue;
+						}
+						
+						itemBuilder.setIntTag("reward_" + slot + "_slot", Integer.parseInt(key))
+							.setStringTag("reward_" + slot + "_name", name)
+							.setStringTag("reward_" + slot + "_material", material.name())
+							.setIntTag("reward_" + slot + "_count", amount);
+						slot++;
+					}
+				}
+				itemBuilder.build();
 				
 				target.getInventory().addItem(itemBuilder.getItemStack());
 				target.sendMessage(this.prefix + "§7Vous avez reçu x" + count + " §7parchemin §b" + args[2]);

@@ -1,7 +1,7 @@
+# Lié à la commande de give de l'item
 Item:
   material: PAPER
   name: "&bdefault"
-
 
 # event = BREAK, ENCHANT, FISHING, HARVEST, KILL
 # type si event =
@@ -10,12 +10,65 @@ Item:
 # 				ENCHANT: ALL, ...
 # 				BREAK: ALL, STONE, GRASS, ...
 #
+# Exemple:
+# Quetes:
+#   0:
+#     name: "Tuez 10 cochons"
+#     event: KILL
+#     type: PIG
+#     customName: "&9Groin"
+#     age:
+#       filter: ADULTE
+#     count: 10
+#     dropItem: true
 #
-# (Mob ageable)
-# age:
-#   filter =
-# 			ADULTE
-# 			BABY
+#   1:
+#     name: "&7Tuez 10 &2Morts vivant bébé"
+#     event: KILL
+#     type: ZOMBIE
+#     customName: "&2Morts vivant bébé"
+#     age:
+#       filter: BABY
+#     count: 10
+#     dropItem: true
+#
+#   3:
+#     name: "&7Cassez 10 pierres lisse"
+#     event: BREAK
+#     type: STONE
+#     count: 10
+#     dropItem: true
+#     reward: # Optionnel
+#       name: "&6Stone"
+#       material: "STONE"
+#       count: 1
+#
+#   4:
+#     name: "&7Enchantez 10 livres"
+#     event: ENCHANT
+#     type: ALL
+#     customName: "&2Morts vivant bébé"
+#     count: 10
+#     dropItem: true
+#     rewards: # Optionnel
+#       - "STONE:1:&bTest"
+#
+#   5:
+#     name: "&7Pêchez 10 morues"
+#     event: FISHING
+#     type: COD
+#     count: 10
+#     dropItem: true
+#
+#   6:
+#     name: "&7Récoltez 10 blées"
+#     event: BREAK
+#     type: WHEAT
+#     count: 10
+#     dropItem: true
+
+
+
 
 Quetes:
   0:
@@ -23,8 +76,8 @@ Quetes:
     event: BREAK
     type: STONE
     count: 10
-    noDrop: true
-    reward:
+    dropItem: true
+    reward: # Optionnel
       name: "&6Stone"
       material: "STONE"
       count: 1
@@ -33,28 +86,48 @@ Quetes:
     event: ENCHANT
     type: ALL
     count: 10
-    rewards:
+    dropItem: true
+    rewards: # Optionnel
       - "STONE:1:&bTest"
   2:
     name: "Pêchez 10 morues"
     event: FISHING
     type: COD
     count: 10
+    dropItem: true
   3:
     name: "Récoltez 10 blées"
     event: BREAK
     type: WHEAT
     count: 10
+    dropItem: true
   4:
     name: "Tuez 10 cochons"
     event: KILL
     type: PIG
-    age:
+    customName: "Groin" # Optionnel
+    age: # Optionnel
       filter: ADULTE
     count: 10
-    
+    dropItem: true
+
+# Rewards:
+  #  Commands:
+  #    0:
+  #      command: "give %player% STONE 1"
+  #      pourcent: 90
+  #    1:
+  #      command: ""
+  #      pourcent: 20
+
 Rewards:
-  0:
-    name: "&bPierre lisse"
-    material: STONE
-    count: 1
+  Inventory:
+    0:
+      name: "&bPierre lisse"
+      material: STONE
+      count: 1
+    1:
+      name: "&bTerre magique"
+      material: GRASS_BLOCK
+      count: 1
+      pourcent: 95

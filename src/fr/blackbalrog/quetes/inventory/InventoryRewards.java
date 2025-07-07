@@ -1,6 +1,8 @@
 package fr.blackbalrog.quetes.inventory;
 
 import java.io.File;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,30 +17,55 @@ import org.bukkit.inventory.ItemStack;
 
 import fr.blackbalrog.quetes.Quetes;
 import fr.blackbalrog.quetes.builder.ItemBuilder;
+import fr.blackbalrog.quetes.files.QueteConfiguration;
+import fr.blackbalrog.quetes.utils.InventoryPlayerUtils;
 
 public class InventoryRewards implements Listener
 {
-	public void openInventory(Player player, FileConfiguration configuration)
+	
+	private QueteConfiguration queteConfiguration = Quetes.getInstance().getQueteConfiguration();
+	private String prefix = Quetes.getInstance().getPrefix();
+	
+	public void openInventory(Player player, ItemBuilder itemBuilder)
 	{
-		ConfigurationSection rewardsSection = configuration.getConfigurationSection("Rewards");
+		
 		Inventory inventory = Bukkit.createInventory(null, 54, "Récompenses");
-
+		
+		FileConfiguration configuration = this.queteConfiguration.getConfiguration(itemBuilder.getName());
+		ConfigurationSection rewardsSection = configuration.getConfigurationSection("Rewards.Inventory");
+		
 		for (String key : rewardsSection.getKeys(false))
 		{
-			ConfigurationSection section = rewardsSection.getConfigurationSection(key);
+			String materialName = itemBuilder.getStringTag("reward_" + key + "_material");
+			if (materialName == null) continue;
 
-			ItemBuilder itemBuilder = new ItemBuilder(Material.valueOf(section.getString("material")))
-					.setName(section.getString("name").replaceAll("&", "§"))
-					.setAmount(section.getInt("count"));
-			itemBuilder.build();
-
-			inventory.setItem(Integer.parseInt(key), itemBuilder.getItemStack());
+			Material material;
+			try
+			{
+				material = Material.valueOf(materialName);
+			}
+			catch (IllegalArgumentException exeption)
+			{
+				continue;
+			}
+			
+			String name = itemBuilder.getStringTag("reward_" + key + "_name");
+			if (name == null) continue;
+			
+			int count = itemBuilder.getIntTag("reward_" + key + "_count");
+			if (count <= 0) continue;
+			
+			ItemBuilder item = new ItemBuilder(material)
+					.setName(name.replaceAll("&", "§"))
+					.setAmount(count);
+			item.build();
+			inventory.setItem(itemBuilder.getIntTag("reward_" + key + "_slot"), item.getItemStack());
 		}
 		player.openInventory(inventory);
 	}
 
 	@EventHandler
-	public void onInventoryClick2(InventoryClickEvent event)
+	public void onInventoryClick(InventoryClickEvent event)
 	{
 		Player player = (Player) event.getWhoClicked();
 		ItemStack item = event.getCurrentItem();
@@ -47,29 +74,50 @@ public class InventoryRewards implements Listener
 		{
 			if (item == null || event.getClickedInventory() == null) return;
 			event.setCancelled(true);
-		
+			
+			if (event.getClickedInventory().equals(player.getInventory())) return;
+			
+			if (InventoryPlayerUtils.inventoryisFull(player))
+			{
+				player.sendMessage(this.prefix + "§7Vôtre inventaire est plein");
+				return;
+			}
+			
 			player.getInventory().addItem(item);
 			
 			Inventory inventory = event.getInventory();
 			inventory.remove(item);
 			
-			if (inventory.isEmpty())
+			ItemStack[] items = player.getInventory().getContents();
+			
+			Optional<ItemStack> optional = IntStream.range(0, items.length)
+					.mapToObj(i -> items[i])
+					.filter(itemQuete -> {
+						if (itemQuete == null
+								|| !itemQuete.hasItemMeta()
+								|| !itemQuete.getItemMeta().hasDisplayName()) return false;
+						
+						File file = this.queteConfiguration.getFile(itemQuete.getItemMeta().getDisplayName());
+						return file != null && file.exists();
+					})
+					.findFirst();
+
+			ItemStack itemTagQuete = optional.orElse(null);
+			if (itemTagQuete == null)
 			{
-				for (int i = 0; i < player.getInventory().getSize(); i++)
-				{
-					ItemStack itemQuete = player.getInventory().getItem(i);
-					if (itemQuete != null && itemQuete.hasItemMeta() && itemQuete.getItemMeta().hasDisplayName())
-					{
-						File file = new File(Quetes.getInstance().getDataFolder(), "quetes/" + itemQuete.getItemMeta().getDisplayName().replaceAll("§.", "") + ".yml");
-						if (file.exists())
-						{
-							player.getInventory().setItem(i, null);
-							break;
-						}
-					}
-				}
+				player.sendMessage(prefix + "§cImpossible de trouver l'item de quête");
+				return;
 			}
-			player.closeInventory();
+			
+			int slot = event.getSlot();
+			
+			ItemBuilder itemBuilder = new ItemBuilder(itemTagQuete)
+					.removeTag("reward_" + slot + "_name")
+					.removeTag("reward_" + slot + "_material")
+					.removeTag("reward_" + slot + "_count");
+			itemBuilder.build();
+			
+			if (inventory.isEmpty()) InventoryPlayerUtils.removeItemQuete(player);
 		}
 	}
 }

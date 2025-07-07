@@ -1,12 +1,16 @@
 package fr.blackbalrog.quetes.builder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
 import fr.blackbalrog.quetes.Quetes;
@@ -169,6 +173,37 @@ public class ItemBuilder
 		return this.meta.getPersistentDataContainer().get(keyTag, PersistentDataType.STRING);
 	}
 
+	public ItemBuilder removeTag(String key)
+	{
+		if (this.meta instanceof PersistentDataHolder)
+		{
+			PersistentDataContainer container = ((PersistentDataHolder) this.meta).getPersistentDataContainer();
+			NamespacedKey namespacedKey = new NamespacedKey(Quetes.getInstance(), key);
+			container.remove(namespacedKey);
+		}
+		return this;
+	}
+
+	
+	public Map<String, Object> getTags()
+	{
+		Map<String, Object> tags = new HashMap<>();
+		PersistentDataContainer container = this.meta.getPersistentDataContainer();
+
+		for (NamespacedKey key : container.getKeys())
+		{
+			if (container.has(key, PersistentDataType.INTEGER)) tags.put(key.getKey(), container.get(key, PersistentDataType.INTEGER));
+			else if (container.has(key, PersistentDataType.BYTE)) tags.put(key.getKey(), container.get(key, PersistentDataType.BYTE));
+			else if (container.has(key, PersistentDataType.LONG)) tags.put(key.getKey(), container.get(key, PersistentDataType.LONG));
+			else if (container.has(key, PersistentDataType.SHORT)) tags.put(key.getKey(), container.get(key, PersistentDataType.SHORT));
+			else if (container.has(key, PersistentDataType.FLOAT)) tags.put(key.getKey(), container.get(key, PersistentDataType.FLOAT));
+			else if (container.has(key, PersistentDataType.DOUBLE)) tags.put(key.getKey(), container.get(key, PersistentDataType.DOUBLE));
+			else if (container.has(key, PersistentDataType.BOOLEAN)) tags.put(key.getKey(), container.get(key, PersistentDataType.BOOLEAN));
+			else if (container.has(key, PersistentDataType.STRING)) tags.put(key.getKey(), container.get(key, PersistentDataType.STRING));
+		}
+		return tags;
+	}
+	
 	public void build()
 	{
 		this.item.setItemMeta(this.meta);

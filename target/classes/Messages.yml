@@ -1,0 +1,4 @@
+# lock: %quete_name% récupère le nom des quetes
+
+quetes:
+  lock: "&7???"

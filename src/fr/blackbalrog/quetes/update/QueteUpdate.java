@@ -1,8 +1,6 @@
 package fr.blackbalrog.quetes.update;
 
-import java.util.List;
-import java.util.Set;
-
+import fr.blackbalrog.quetes.handler.UpdateHandler;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -17,142 +15,124 @@ import org.bukkit.event.player.PlayerFishEvent;
 import fr.blackbalrog.quetes.Quetes;
 import fr.blackbalrog.quetes.builder.ItemBuilder;
 import fr.blackbalrog.quetes.configurations.DefaultConfiguration;
+import fr.blackbalrog.quetes.manager.Quete;
 
 public class QueteUpdate
 {
-
-	private static DefaultConfiguration configuration = Quetes.getInstance().getConfiguration();
-
+	
+	private DefaultConfiguration configuration = Quetes.getInstance().getConfiguration();
+	private String eventType;
+	private FileConfiguration queteConfiguration;
+	private ItemBuilder itemQuete;
+	private String materialNameQuete;
+	private Event event;
+	private UpdateHandler updateHandler;
+	
+	
+	public QueteUpdate(Event event, UpdateHandler updateHandler, String eventType, FileConfiguration queteConfiguration, ItemBuilder itemQuete, String materialNameQuete)
+	{
+		this.event = event;
+		this.updateHandler = updateHandler;
+		this.eventType = eventType;
+		this.queteConfiguration = queteConfiguration;
+		this.itemQuete = itemQuete;
+		this.materialNameQuete = materialNameQuete;
+	}
+	
 	/**
-	 * @param event 
 	 * @apiNote Update le Tag de la quête
 	 */
-	public static void update(Player player, String eventType, FileConfiguration fileConfiguration, ItemBuilder itemBuilder, String materialName, int slot, Event event)
+	public void update(Player player, int slot)
 	{
-
-		ConfigurationSection questsSection = fileConfiguration.getConfigurationSection("Quetes");
-		if (questsSection == null) return;
-
-		for (String id : questsSection.getKeys(false))
+		
+		ConfigurationSection sectionQuete = queteConfiguration.getConfigurationSection("Quetes");
+		if (sectionQuete == null) return;
+		
+		for (String id : sectionQuete.getKeys(false))
 		{
-			ConfigurationSection section = questsSection.getConfigurationSection(id);
+			ConfigurationSection section = sectionQuete.getConfigurationSection(id);
 			if (section == null) continue;
-
-			String questEvent = section.getString("event");
-			if (questEvent == null || !questEvent.equalsIgnoreCase(eventType)) continue;
-
+			
+			if (!section.getString("event", "").equalsIgnoreCase(eventType)) continue;
 			String type = section.getString("type");
-			if (type == null || (!type.equalsIgnoreCase("ALL") && !materialName.equalsIgnoreCase(type))) continue;
-
-			int progress = itemBuilder.getIntTag("quete_" + id);
-			int required = section.getInt("count");
-
-			if (progress >= required) continue;
-
-			if (section.isConfigurationSection("age"))
+			if (type == null || (!type.equalsIgnoreCase("ALL") && !materialNameQuete.equalsIgnoreCase(type))) continue;
+			
+			Quete quete = new Quete(itemQuete, queteConfiguration);
+			if (quete.isQueteComplete(id)) continue;
+			
+			/*------------------------------------*/
+			
+			// Post Update
+			
+			if (this.updateHandler != null)
 			{
-				ConfigurationSection ageSection = section.getConfigurationSection("age");
-
-				if (event instanceof EntityDeathEvent deathEvent)
-				{
-					if (deathEvent.getEntity() instanceof Ageable ageable)
-					{
-						String filter = ageSection.getString("filter");
-						boolean isAdult = ageable.isAdult();
-
-						if ((filter.equalsIgnoreCase("ADULTE") && !isAdult) || (filter.equalsIgnoreCase("BABY") && isAdult))
-						{
-							return;
-						}
-					}
-				}
+				this.updateHandler.postUpdate(event, section);
 			}
 			
-			progress++;
-			itemBuilder.setIntTag("quete_" + id, progress);
-
-			List<String> newLore = UpdateItemLore.update(itemBuilder, fileConfiguration);
-			itemBuilder.setLores(newLore);
-			itemBuilder.build();
+			/*------------------------------------*/
 			
-			player.getInventory().setItem(slot, itemBuilder.getItemStack());
+			quete.increment(id);
+			int progress = quete.getProgress("quete_" + id);
+			int required = section.getInt("count");
+
+			itemQuete.setLores(UpdateItemLore.update(itemQuete, queteConfiguration));
+			itemQuete.build();
+			player.getInventory().setItem(slot, itemQuete.getItemStack());
 			player.updateInventory();
+			
+			/*------------------------------------*/
+			
+			// Pre Update
+			
+			if (this.updateHandler != null)
+			{
+				this.updateHandler.preUpdate(event, section);
+			}
+			
+			/*------------------------------------*/
 			
 			if (progress == required)
 			{
 				if (configuration.getBoolean("Title.Actived"))
 				{
-					player.sendTitle("§aFélicitations", "§7Quête terminée", 
-							configuration.getInt("Title.Timer.fadeIn"), 
-							configuration.getInt("Title.Timer.stay"), 
-							configuration.getInt("Title.Timer.fadeOut"));
+					player.sendTitle("§aFélicitations", "§7Quête terminée",
+							this.configuration.getInt("Title.Timer.fadeIn"), 
+							this.configuration.getInt("Title.Timer.stay"), 
+							this.configuration.getInt("Title.Timer.fadeOut"));
 				}
 				
 				if (section.contains("reward"))
 				{
-					ConfigurationSection sectionReward = section.getConfigurationSection("reward");
-					ItemBuilder itemReward = new ItemBuilder(Material.valueOf(sectionReward.getString("material")));
-					itemReward.setName(sectionReward.getString("name").replaceAll("&", "§"))
-						.setAmount(sectionReward.getInt("count"))
-						.build();
-					player.getInventory().addItem(itemReward.getItemStack());
+					ConfigurationSection rewardSection = section.getConfigurationSection("reward");
+					ItemBuilder reward = new ItemBuilder(Material.valueOf(rewardSection.getString("material")))
+							.setName(rewardSection.getString("name").replaceAll("&", "§"))
+							.setAmount(rewardSection.getInt("count"));
+					reward.build();
+					player.getInventory().addItem(reward.getItemStack());
 				}
 				
 				if (section.contains("rewards"))
 				{
-					for (String reward : section.getStringList("rewards"))
+					for (String rewardStr : section.getStringList("rewards"))
 					{
-						String[] blockLine = reward.split(":");
-						
-						/**
-						 * args[0] = material
-						 * args[1] = amount
-						 * args[2] = name
-						 * 
-						 * - "STONE:1:&bTest"
-						 */
-						
-						ItemBuilder itemReward = new ItemBuilder(Material.valueOf(blockLine[0]));
-						itemReward.setName(blockLine[2].replaceAll("&", "§"))
-							.setAmount(Integer.parseInt(blockLine[1]))
-							.build();
-						player.getInventory().addItem(itemReward.getItemStack());
+						String[] split = rewardStr.split(":");
+						ItemBuilder reward = new ItemBuilder(Material.valueOf(split[0]))
+								.setName(split[2].replaceAll("&", "§"))
+								.setAmount(Integer.parseInt(split[1]));
+						reward.build();
+						player.getInventory().addItem(reward.getItemStack());
 					}
 				}
 			}
-
-			if (allQuetesCompleted(itemBuilder, questsSection))
+			
+			if (quete.isAllCompleted())
 			{
 				player.sendTitle("§aFélicitations", "§7Vous avez terminé toutes les quêtes", 
-						configuration.getInt("Title.Timer.fadeIn"), 
-						configuration.getInt("Title.Timer.stay"), 
-						configuration.getInt("Title.Timer.fadeOut"));
-			}
-			
-			if (section.contains("noDrop") && section.getBoolean("noDrop"))
-			{
-				if (event instanceof BlockBreakEvent) ((BlockBreakEvent) event).setDropItems(false);
-				if (event instanceof EnchantItemEvent) ((EnchantItemEvent) event).getItem().setType(Material.AIR);
-				if (event instanceof PlayerFishEvent 
-						&& ((PlayerFishEvent) event).getState() == PlayerFishEvent.State.CAUGHT_FISH 
-						&& ((PlayerFishEvent) event).getCaught() != null) ((PlayerFishEvent) event).getCaught().remove();
-				if (event instanceof EntityDeathEvent) ((EntityDeathEvent) event).getDrops().clear();
+						this.configuration.getInt("Title.Timer.fadeIn"), 
+						this.configuration.getInt("Title.Timer.stay"), 
+						this.configuration.getInt("Title.Timer.fadeOut"));
 			}
 			return;
 		}
-	}
-	
-	private static boolean allQuetesCompleted(ItemBuilder itemBuilder, ConfigurationSection questsSection)
-	{
-		Set<String> allQuests = questsSection.getKeys(false);
-		for (String questId : allQuests)
-		{
-			ConfigurationSection quest = questsSection.getConfigurationSection(questId);
-			if (quest == null) continue;
-			int required = quest.getInt("count");
-			int progress = itemBuilder.getIntTag("quete_" + questId);
-			if (progress < required) return false;
-		}
-		return true;
 	}
 }

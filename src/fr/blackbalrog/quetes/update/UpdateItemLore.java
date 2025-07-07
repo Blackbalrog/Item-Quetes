@@ -26,19 +26,19 @@ public class UpdateItemLore
 		{
 			ConfigurationSection section = config.getConfigurationSection("Quetes." + id);
 			String name = section.getString("name").replace("&", "§");
-			int current = builder.getIntTag("quete_" + id);
+			int progress = builder.getIntTag("quete_" + id);
 			int max = section.getInt("count");
 
-			if (current >= max)
+			if (progress >= max)
 			{
 				lore.add("§7§m" + name + ": " + max);
 				continue;
 			}
-
+			
 			if (!foundCurrent)
 			{
 				foundCurrent = true;
-				lore.add("§a§l" + name + ": §b" + current);
+				lore.add("§a§l" + name + ": §b" + progress);
 			}
 			else
 			{
