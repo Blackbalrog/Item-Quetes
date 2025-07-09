@@ -1,23 +1,21 @@
 package fr.blackbalrog.quetes.update;
 
 import fr.blackbalrog.quetes.handler.UpdateHandler;
+import fr.blackbalrog.quetes.utils.Hand;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.enchantment.EnchantItemEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.player.PlayerFishEvent;
 
 import fr.blackbalrog.quetes.Quetes;
 import fr.blackbalrog.quetes.builder.ItemBuilder;
 import fr.blackbalrog.quetes.configurations.DefaultConfiguration;
 import fr.blackbalrog.quetes.manager.Quete;
+import org.bukkit.inventory.ItemStack;
 
-public class QueteUpdate
+public class QueteUpdate<E extends Event>
 {
 	
 	private DefaultConfiguration configuration = Quetes.getInstance().getConfiguration();
@@ -25,11 +23,11 @@ public class QueteUpdate
 	private FileConfiguration queteConfiguration;
 	private ItemBuilder itemQuete;
 	private String materialNameQuete;
-	private Event event;
-	private UpdateHandler updateHandler;
+	private E event;
+	private UpdateHandler<E> updateHandler;
 	
 	
-	public QueteUpdate(Event event, UpdateHandler updateHandler, String eventType, FileConfiguration queteConfiguration, ItemBuilder itemQuete, String materialNameQuete)
+	public QueteUpdate(E event, UpdateHandler<E> updateHandler, String eventType, FileConfiguration queteConfiguration, ItemBuilder itemQuete, String materialNameQuete)
 	{
 		this.event = event;
 		this.updateHandler = updateHandler;
@@ -64,9 +62,32 @@ public class QueteUpdate
 			
 			// Post Update
 			
+			if (section.isConfigurationSection("condition"))
+			{
+				ConfigurationSection sectionCondition = section.getConfigurationSection("condition");
+				
+				String handType = sectionCondition.getString("Hand", "MAIN_HAND");
+				Hand hand = safeValueOf(Hand.class, handType);
+				if (hand == null) continue;
+				
+				ItemStack itemInHand = hand.getItem(player);
+				if (itemInHand == null || !itemInHand.hasItemMeta()) continue;
+				
+				Material material = safeValueOf(Material.class, sectionCondition.getString("material", ""));
+				if (material == null) continue;
+				if (itemInHand.getType() != material) continue;
+				
+				String expectedName = ChatColor.translateAlternateColorCodes('&', sectionCondition.getString("name", ""));
+				String actualName = itemInHand.getItemMeta().getDisplayName();
+				if (!expectedName.equals(actualName)) continue;
+				
+				Quetes.getInstance().getConsole().setMessage("§3DEBUG: OK");
+			}
+			
 			if (this.updateHandler != null)
 			{
-				this.updateHandler.postUpdate(event, section);
+				boolean authorized = this.updateHandler.postUpdate(event, section);
+				if (!authorized) return;
 			}
 			
 			/*------------------------------------*/
@@ -135,4 +156,11 @@ public class QueteUpdate
 			return;
 		}
 	}
+	
+	private <T extends Enum<T>> T safeValueOf(Class<T> clazz, String name)
+	{
+		try { return Enum.valueOf(clazz, name); }
+		catch (Exception exeption) { return null; }
+	}
+	
 }

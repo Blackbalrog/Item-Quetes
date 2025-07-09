@@ -14,29 +14,29 @@ import fr.blackbalrog.quetes.handler.QueteHandler;
 import fr.blackbalrog.quetes.handler.QueteRegisters;
 import org.bukkit.event.entity.EntityDeathEvent;
 
-public class EnchantListener implements Listener, QueteHandler, UpdateHandler
+public class EnchantListener implements Listener, QueteHandler<EnchantItemEvent>, UpdateHandler<EnchantItemEvent>
 {
-
+	
 	@Override
 	public boolean supports(Event event)
 	{
 		return event instanceof EnchantItemEvent;
 	}
-
+	
 	@Override
-	public Player getPlayer(Event event)
+	public Player getPlayer(EnchantItemEvent event)
 	{
-		return ((EnchantItemEvent) event).getEnchanter();
+		return event.getEnchanter();
 	}
 
 	@Override
-	public Material getMaterial(Event event)
+	public Material getMaterial(EnchantItemEvent event)
 	{
-		return ((EnchantItemEvent) event).getItem().getType();
+		return event.getItem().getType();
 	}
 
 	@Override
-	public EntityType getEntityType(Event event)
+	public EntityType getEntityType(EnchantItemEvent event)
 	{
 		return null;
 	}
@@ -54,15 +54,11 @@ public class EnchantListener implements Listener, QueteHandler, UpdateHandler
 	}
 	
 	@Override
-	public void postUpdate(Event event, ConfigurationSection section)
-	{
-	
-	}
+	public boolean postUpdate(EnchantItemEvent event, ConfigurationSection section) {return true;}
 	
 	@Override
-	public void preUpdate(Event event, ConfigurationSection section)
+	public void preUpdate(EnchantItemEvent event, ConfigurationSection section)
 	{
-		if (event instanceof EnchantItemEvent  && section.getBoolean("dropItem"))
-			((EnchantItemEvent) event).getItem().setType(Material.AIR);
+		event.getItem().setType(section.getBoolean("dropItem")  ? event.getItem().getType() : Material.AIR);
 	}
 }

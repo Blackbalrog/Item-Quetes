@@ -20,6 +20,8 @@ import org.bukkit.entity.Player;
 import fr.blackbalrog.quetes.Quetes;
 import fr.blackbalrog.quetes.builder.ItemBuilder;
 import fr.blackbalrog.quetes.message.Console;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class CommandQuetes implements CommandExecutor, TabCompleter
 {
@@ -48,7 +50,20 @@ public class CommandQuetes implements CommandExecutor, TabCompleter
 				return true;
 			}
 		}
-		
+		/*
+		if (args.length == 3)
+		{
+			if (args[0].equalsIgnoreCase("give"))
+			{
+				ItemStack itemStack = new ItemStack(Material.valueOf(args[1]));
+				ItemMeta meta = itemStack.getItemMeta();
+				meta.setDisplayName(args[2].replaceAll("&", "§"));
+				itemStack.setItemMeta(meta);
+				((Player) sender).getInventory().addItem(itemStack);
+				return true;
+			}
+		}
+		*/
 		if (args.length == 4)
 		{
 			if (args[0].equalsIgnoreCase("give"))

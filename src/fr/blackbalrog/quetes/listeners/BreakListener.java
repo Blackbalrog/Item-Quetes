@@ -1,6 +1,5 @@
 package fr.blackbalrog.quetes.listeners;
 
-import fr.blackbalrog.quetes.Quetes;
 import fr.blackbalrog.quetes.handler.UpdateHandler;
 import org.bukkit.Material;
 import org.bukkit.block.data.Ageable;
@@ -15,40 +14,39 @@ import org.bukkit.event.block.BlockBreakEvent;
 import fr.blackbalrog.quetes.handler.QueteHandler;
 import fr.blackbalrog.quetes.handler.QueteRegisters;
 
-public class BreakListener implements Listener, QueteHandler, UpdateHandler
+public class BreakListener implements Listener, QueteHandler<BlockBreakEvent>, UpdateHandler<BlockBreakEvent>
 {
-
+	
 	@Override
 	public boolean supports(Event event)
 	{
 		return event instanceof BlockBreakEvent;
 	}
-
+	
 	@Override
-	public Player getPlayer(Event event)
+	public Player getPlayer(BlockBreakEvent event)
 	{
-		return ((BlockBreakEvent) event).getPlayer();
+		return event.getPlayer();
 	}
 
 	@Override
-	public Material getMaterial(Event event)
+	public Material getMaterial(BlockBreakEvent event)
 	{
-		BlockBreakEvent breakEvent = (BlockBreakEvent) event;
-		Material type = breakEvent.getBlock().getType();
+		Material type = event.getBlock().getType();
 
-		if (breakEvent.getBlock().getBlockData() instanceof Ageable ageable)
+		if (event.getBlock().getBlockData() instanceof Ageable ageable)
 		{
 			return ageable.getAge() == ageable.getMaximumAge() ? type : Material.AIR;
 		}
 		if (type == Material.SUGAR_CANE || type == Material.CACTUS)
 		{
-			return breakEvent.getBlock().getRelative(0, 1, 0).getType() == type ? type : Material.AIR;
+			return event.getBlock().getRelative(0, 1, 0).getType() == type ? type : Material.AIR;
 		}
 		return type;
 	}
 
 	@Override
-	public EntityType getEntityType(Event event)
+	public EntityType getEntityType(BlockBreakEvent event)
 	{
 		return null;
 	}
@@ -62,21 +60,18 @@ public class BreakListener implements Listener, QueteHandler, UpdateHandler
 	@EventHandler
 	public void onBreak(BlockBreakEvent event)
 	{
-		QueteRegisters.register(event, this,this);
+		QueteRegisters.register(event,this,this);
 	}
 	
 	@Override
-	public void postUpdate(Event event, ConfigurationSection section)
+	public boolean postUpdate(BlockBreakEvent event, ConfigurationSection section)
 	{
-	
+		return true;
 	}
 	
 	@Override
-	public void preUpdate(Event event, ConfigurationSection section)
+	public void preUpdate(BlockBreakEvent event, ConfigurationSection section)
 	{
-		if (event instanceof BlockBreakEvent)
-		{
-			((BlockBreakEvent) event).setDropItems(section.getBoolean("dropItem"));
-		}
+		event.setDropItems(section.getBoolean("dropItem"));
 	}
 }

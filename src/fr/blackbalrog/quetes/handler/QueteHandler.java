@@ -5,30 +5,40 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 
-public interface QueteHandler
+public interface QueteHandler<E extends Event>
 {
+	
+	/**
+	 * @param event
+	 * @return Appel de l'event
+	 */
+	default E getEvent(E event)
+	{
+		return event;
+	}
+	
 	/**
 	 * @apiNote Vérification si l'event est supporter
 	 */
-	public boolean supports(Event event);
+	boolean supports(Event event);
 	
 	/**
 	 * @apiNote Récupère le joueur lié à l'event
 	 */
-	public Player getPlayer(Event event);
+	Player getPlayer(E event);
 	
 	/**
 	 * @apiNote Récupère le material de l'event
 	 */
-	public Material getMaterial(Event event);
+	Material getMaterial(E event);
 	
 	/**
 	 * @apiNote Récupère le type d'entité de l'event
 	 */
-	public EntityType getEntityType(Event event);
+	EntityType getEntityType(E event);
 	
 	/**
 	 * @apiNote Lié à la configuration du parchemin = Clé "event"
 	 */
-	public String getEventType();
+	String getEventType();
 }

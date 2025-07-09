@@ -14,36 +14,33 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import fr.blackbalrog.quetes.handler.QueteHandler;
 import fr.blackbalrog.quetes.handler.QueteRegisters;
 
-public class KillListeners implements Listener, QueteHandler, UpdateHandler
+public class KillListeners implements Listener, QueteHandler<EntityDeathEvent>, UpdateHandler<EntityDeathEvent>
 {
+	
 	@Override
 	public boolean supports(Event event)
 	{
 		return event instanceof EntityDeathEvent;
 	}
-
-
+	
 	@Override
-	public Player getPlayer(Event event)
+	public Player getPlayer(EntityDeathEvent event)
 	{
-		return ((EntityDeathEvent) event).getEntity().getKiller();
+		return event.getEntity().getKiller();
 	}
-
-
+	
 	@Override
-	public Material getMaterial(Event event)
+	public Material getMaterial(EntityDeathEvent event)
 	{
 		return null;
 	}
-
-
+	
 	@Override
-	public EntityType getEntityType(Event event)
+	public EntityType getEntityType(EntityDeathEvent event)
 	{
-		return ((EntityDeathEvent) event).getEntityType();
+		return event.getEntityType();
 	}
-
-
+	
 	@Override
 	public String getEventType()
 	{
@@ -59,30 +56,41 @@ public class KillListeners implements Listener, QueteHandler, UpdateHandler
 	}
 	
 	@Override
-	public void postUpdate(Event event, ConfigurationSection section)
+	public boolean postUpdate(EntityDeathEvent event, ConfigurationSection section)
 	{
-		EntityDeathEvent deathEvent = (EntityDeathEvent) event;
 		if (section.contains("age"))
 		{
-			if (deathEvent.getEntity() instanceof Ageable ageable)
+			if (event.getEntity() instanceof Ageable ageable)
 			{
 				String filter = section.getConfigurationSection("age").getString("filter");
 				boolean isAdult = ageable.isAdult();
-				if ((filter.equalsIgnoreCase("ADULTE") && !isAdult) || (filter.equalsIgnoreCase("BABY") && isAdult)) return;
+				if ((filter.equalsIgnoreCase("ADULTE") && !isAdult)
+						|| (filter.equalsIgnoreCase("BABY")  &&  isAdult))
+				{
+					return false;
+				}
 			}
 		}
-		else if (section.contains("customName"))
+		
+		if (section.contains("customName"))
 		{
-			String customName = deathEvent.getEntity().getCustomName();
+			String customName   = event.getEntity().getCustomName();
 			String expectedName = section.getString("customName").replaceAll("&", "§");
-			if (customName == null || !customName.equals(expectedName)) return;
+			if (customName == null || !customName.equals(expectedName))
+			{
+				return false;
+			}
+			
 		}
+		return true;
 	}
 	
 	@Override
-	public void preUpdate(Event event, ConfigurationSection section)
+	public void preUpdate(EntityDeathEvent event, ConfigurationSection section)
 	{
-		if (event instanceof EntityDeathEvent && section.getBoolean("dropItem"))
-			((EntityDeathEvent) event).getDrops().clear();
+		if (!section.getBoolean("dropItem"))
+		{
+			event.getDrops().clear();
+		}
 	}
 }

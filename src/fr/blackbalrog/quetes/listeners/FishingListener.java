@@ -16,7 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import fr.blackbalrog.quetes.handler.QueteHandler;
 import fr.blackbalrog.quetes.handler.QueteRegisters;
 
-public class FishingListener implements Listener, QueteHandler, UpdateHandler
+public class FishingListener implements Listener, QueteHandler<PlayerFishEvent>, UpdateHandler<PlayerFishEvent>
 {
 	
 	@Override
@@ -28,15 +28,15 @@ public class FishingListener implements Listener, QueteHandler, UpdateHandler
 	}
 
 	@Override
-	public Player getPlayer(Event event)
+	public Player getPlayer(PlayerFishEvent event)
 	{
-		return ((PlayerFishEvent) event).getPlayer();
+		return event.getPlayer();
 	}
 
 	@Override
-	public Material getMaterial(Event event)
+	public Material getMaterial(PlayerFishEvent event)
 	{
-		Entity caught = ((PlayerFishEvent) event).getCaught();
+		Entity caught = event.getCaught();
 		if (!(caught instanceof Item item)) return null;
 
 		Material material = item.getItemStack().getType();
@@ -44,9 +44,9 @@ public class FishingListener implements Listener, QueteHandler, UpdateHandler
 	}
 
 	@Override
-	public EntityType getEntityType(Event event)
+	public EntityType getEntityType(PlayerFishEvent event)
 	{
-		Entity caught = ((PlayerFishEvent) event).getCaught();
+		Entity caught = event.getCaught();
 		if (!(caught instanceof Item)) return null;
 
 		ItemStack caughtItemStack = ((Item) caught).getItemStack();
@@ -79,18 +79,16 @@ public class FishingListener implements Listener, QueteHandler, UpdateHandler
 	}
 	
 	@Override
-	public void postUpdate(Event event, ConfigurationSection section)
-	{
-	
-	}
+	public boolean postUpdate(PlayerFishEvent event, ConfigurationSection section) {return true;}
 	
 	@Override
-	public void preUpdate(Event event, ConfigurationSection section)
+	public void preUpdate(PlayerFishEvent event, ConfigurationSection section)
 	{
-		if (event instanceof PlayerFishEvent
-				&& ((PlayerFishEvent) event).getState() == PlayerFishEvent.State.CAUGHT_FISH
-				&& ((PlayerFishEvent) event).getCaught() != null
-				&& section.getBoolean("dropItem"))
-			((PlayerFishEvent) event).getCaught().remove();
+		if (event.getState() == PlayerFishEvent.State.CAUGHT_FISH
+				&& event.getCaught() != null
+				&& !section.getBoolean("dropItem"))
+		{
+			event.getCaught().remove();
+		}
 	}
 }

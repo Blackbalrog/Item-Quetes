@@ -1,11 +1,11 @@
 fr\blackbalrog\quetes\Quetes.class
 fr\blackbalrog\quetes\listeners\BreakListener.class
 fr\blackbalrog\quetes\listeners\EnchantListener.class
+fr\blackbalrog\quetes\utils\Hand.class
 fr\blackbalrog\quetes\builder\ItemBuilder.class
 fr\blackbalrog\quetes\configurations\DefaultConfiguration.class
 fr\blackbalrog\quetes\listeners\interact\PlayerInteractInventoryListener.class
 fr\blackbalrog\quetes\files\QueteConfiguration.class
-fr\blackbalrog\quetes\listeners\HarvestListener.class
 fr\blackbalrog\quetes\listeners\FishingListener.class
 fr\blackbalrog\quetes\listeners\KillListeners.class
 fr\blackbalrog\quetes\inventory\InventoryRewards.class
@@ -18,3 +18,4 @@ fr\blackbalrog\quetes\configurations\ConfigurationManager.class
 fr\blackbalrog\quetes\message\Console.class
 fr\blackbalrog\quetes\update\UpdateItemLore.class
 fr\blackbalrog\quetes\handler\UpdateHandler.class
+fr\blackbalrog\quetes\listeners\EntityPickupItemListener.class

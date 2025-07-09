@@ -17,10 +17,12 @@ public class QueteRegisters
 
 	private static QueteConfiguration queteConfiguration = Quetes.getInstance().getQueteConfiguration();
 	
-	public static void register(Event event, QueteHandler handler, UpdateHandler updateHandler)
+	public static <E extends Event> void register(E rawEvent, QueteHandler<E> handler, UpdateHandler<E> updateHandler)
 	{
-		if (!handler.supports(event)) return;
-
+		if (!handler.supports(rawEvent)) return;
+		
+		E event = handler.getEvent(rawEvent);
+		
 		Player player = handler.getPlayer(event);
 		Material material = handler.getMaterial(event);
 		EntityType entityType = handler.getEntityType(event);

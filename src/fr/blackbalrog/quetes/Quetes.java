@@ -1,5 +1,6 @@
 package fr.blackbalrog.quetes;
 
+import fr.blackbalrog.quetes.listeners.*;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -8,11 +9,6 @@ import fr.blackbalrog.quetes.configurations.ConfigurationManager;
 import fr.blackbalrog.quetes.configurations.DefaultConfiguration;
 import fr.blackbalrog.quetes.files.QueteConfiguration;
 import fr.blackbalrog.quetes.inventory.InventoryRewards;
-import fr.blackbalrog.quetes.listeners.BreakListener;
-import fr.blackbalrog.quetes.listeners.EnchantListener;
-import fr.blackbalrog.quetes.listeners.FishingListener;
-import fr.blackbalrog.quetes.listeners.HarvestListener;
-import fr.blackbalrog.quetes.listeners.KillListeners;
 import fr.blackbalrog.quetes.listeners.interact.PlayerInteractInventoryListener;
 import fr.blackbalrog.quetes.logger.DeathLog4jFilter;
 import fr.blackbalrog.quetes.message.Console;
@@ -77,10 +73,15 @@ public class Quetes extends JavaPlugin
 		pluginManager.registerEvents(new PlayerInteractInventoryListener(), this);
 		pluginManager.registerEvents(new InventoryRewards(), this);
 		
+		/**
+		 * Voir pour faire un pluginManagerBuilder et faire une boucle for pour lister les listener enregistrer
+		 * peut servire pour l'api
+		 */
+		
 		pluginManager.registerEvents(new BreakListener(), this);
 		pluginManager.registerEvents(new EnchantListener(), this);
 		pluginManager.registerEvents(new FishingListener(), this);
-		pluginManager.registerEvents(new HarvestListener(), this);
+		pluginManager.registerEvents(new EntityPickupItemListener(), this);
 		pluginManager.registerEvents(new KillListeners(), this);
 	}
 	
