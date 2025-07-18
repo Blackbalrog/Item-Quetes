@@ -1,6 +1,6 @@
 package fr.blackbalrog.quetes.listeners;
 
-import fr.blackbalrog.quetes.handler.UpdateHandler;
+import fr.blackbalrog.quetes.api.handler.UpdateHandler;
 import org.bukkit.Material;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.configuration.ConfigurationSection;
@@ -11,8 +11,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
-import fr.blackbalrog.quetes.handler.QueteHandler;
-import fr.blackbalrog.quetes.handler.QueteRegisters;
+import fr.blackbalrog.quetes.api.handler.QueteHandler;
+import fr.blackbalrog.quetes.api.handler.QueteRegisters;
 
 public class BreakListener implements Listener, QueteHandler<BlockBreakEvent>, UpdateHandler<BlockBreakEvent>
 {
@@ -60,6 +60,7 @@ public class BreakListener implements Listener, QueteHandler<BlockBreakEvent>, U
 	@EventHandler
 	public void onBreak(BlockBreakEvent event)
 	{
+		if (event.isCancelled()) return;
 		QueteRegisters.register(event,this,this);
 	}
 	

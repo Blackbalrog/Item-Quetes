@@ -177,7 +177,7 @@ public class ItemBuilder
 	{
 		if (this.meta instanceof PersistentDataHolder)
 		{
-			PersistentDataContainer container = ((PersistentDataHolder) this.meta).getPersistentDataContainer();
+			PersistentDataContainer container = this.meta.getPersistentDataContainer();
 			NamespacedKey namespacedKey = new NamespacedKey(Quetes.getInstance(), key);
 			container.remove(namespacedKey);
 		}
@@ -202,6 +202,13 @@ public class ItemBuilder
 			else if (container.has(key, PersistentDataType.STRING)) tags.put(key.getKey(), container.get(key, PersistentDataType.STRING));
 		}
 		return tags;
+	}
+	
+	public boolean isContainsTag(String tag)
+	{
+		PersistentDataContainer container = this.meta.getPersistentDataContainer();
+		NamespacedKey keyTag = new NamespacedKey(Quetes.getInstance(), tag);
+		return container.has(keyTag);
 	}
 	
 	public void build()

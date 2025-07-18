@@ -1,8 +1,8 @@
 package fr.blackbalrog.quetes.listeners;
 
-import fr.blackbalrog.quetes.handler.QueteHandler;
-import fr.blackbalrog.quetes.handler.QueteRegisters;
-import fr.blackbalrog.quetes.handler.UpdateHandler;
+import fr.blackbalrog.quetes.api.handler.QueteHandler;
+import fr.blackbalrog.quetes.api.handler.QueteRegisters;
+import fr.blackbalrog.quetes.api.handler.UpdateHandler;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
@@ -47,6 +47,7 @@ public class EntityPickupItemListener implements Listener, QueteHandler<EntityPi
 	@EventHandler
 	public void onPickup(EntityPickupItemEvent event)
 	{
+		if (event.isCancelled()) return;
 		QueteRegisters.register(event, this,this);
 	}
 	

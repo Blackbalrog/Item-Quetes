@@ -1,6 +1,6 @@
 package fr.blackbalrog.quetes.listeners;
 
-import fr.blackbalrog.quetes.handler.UpdateHandler;
+import fr.blackbalrog.quetes.api.handler.UpdateHandler;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Ageable;
@@ -11,8 +11,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
-import fr.blackbalrog.quetes.handler.QueteHandler;
-import fr.blackbalrog.quetes.handler.QueteRegisters;
+import fr.blackbalrog.quetes.api.handler.QueteHandler;
+import fr.blackbalrog.quetes.api.handler.QueteRegisters;
 
 public class KillListeners implements Listener, QueteHandler<EntityDeathEvent>, UpdateHandler<EntityDeathEvent>
 {
@@ -51,7 +51,6 @@ public class KillListeners implements Listener, QueteHandler<EntityDeathEvent>, 
 	public void onKill(EntityDeathEvent event)
 	{
 		if (!(event.getEntity().getKiller() instanceof Player)) return;
-		
 		QueteRegisters.register(event, this,this);
 	}
 	

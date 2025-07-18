@@ -10,10 +10,16 @@ Item:
 # 				ENCHANT: ALL, ...
 # 				BREAK: ALL, STONE, GRASS, ...
 #
+# conditions:
+#   HAND, OFF_HAND, FEET, LEGS, CHEST, HEAD
+#
 # Exemple:
 # Quetes:
 #   0:
 #     name: "Tuez 10 cochons"
+#     lores:
+#       - "Vous devez disposer d'une éppée en netherite"
+#       - "Qui doit s'appeler &aEppee"
 #     event: KILL
 #     type: PIG
 #     customName: "&9Groin"
@@ -21,6 +27,10 @@ Item:
 #       filter: ADULTE
 #     count: 10
 #     dropItem: true
+#     conditions:
+#       HAND:
+#         material: NETHERITE_SWORD
+#         name: "&aEppee"
 #
 #   1:
 #     name: "&7Tuez 10 &2Morts vivant bébé"
@@ -72,53 +82,53 @@ Item:
 
 Quetes:
   0:
-    name: "Cassez 10 pierres"
+    name: "Cassez 1 pierres"
     event: BREAK
     type: STONE
-    count: 10
-    dropItem: true
+    count: 1
+    dropItem: false
+    conditions:
+      HAND:
+        material: DIAMOND_PICKAXE
+        name: "&bPioche"
     reward: # Optionnel
       name: "&6Stone"
       material: "STONE"
       count: 1
   1:
-    name: "Enchantez 10 livres"
+    name: "Enchantez 1 livres"
     event: ENCHANT
     type: ALL
-    count: 10
-    dropItem: true
+    count: 1
+    dropItem: false
     rewards: # Optionnel
       - "STONE:1:&bTest"
   2:
-    name: "Pêchez 10 morues"
+    name: "Pêchez 1 morues"
     event: FISHING
     type: COD
-    count: 10
-    dropItem: true
+    count: 1
+    dropItem: false
   3:
-    name: "Récoltez 10 blées"
+    name: "Récoltez 1 blées"
     event: BREAK
     type: WHEAT
-    count: 10
-    dropItem: true
+    count: 1
+    dropItem: false
   4:
-    name: "Tuez 10 cochons"
+    name: "Tuez 1 cochons"
     event: KILL
     type: PIG
     customName: "Groin" # Optionnel
     age: # Optionnel
       filter: ADULTE
-    count: 10
-    dropItem: true
+    count: 1
+    dropItem: false
+    conditions:
+      HAND:
+        material: NETHERITE_SWORD
+        name: "&aEppee"
 
-# Rewards:
-  #  Commands:
-  #    0:
-  #      command: "give %player% STONE 1"
-  #      pourcent: 90
-  #    1:
-  #      command: ""
-  #      pourcent: 20
 
 Rewards:
   Inventory:

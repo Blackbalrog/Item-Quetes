@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import fr.blackbalrog.quetes.api.update.ItemLore;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -119,45 +120,9 @@ public class PlayerInteractInventoryListener implements Listener
 				}
 				else
 				{
-					int queteIndex = 0;
-					for (String id : configuration.getConfigurationSection("Quetes").getKeys(false))
-					{
-						ConfigurationSection section = configuration.getConfigurationSection("Quetes." + id);
-						if (queteIndex == 0)
-						{
-							listQuetes.add("§a§l" + section.getString("name").replaceAll("&", "§") + ": §b0");
-						}
-						else
-						{
-							String quete_name = section.getString("name")
-									.replaceAll("&", "§");
-							String quetes_lock = this.messages.getString("quetes.lock")
-									.replace("%quete_name%", quete_name)
-									.replaceAll("&", "§");
-							listQuetes.add(quetes_lock);
-						}
-						queteIndex++;
-					}
-	
-					loreFinal.addAll(lores);
-					loreFinal.addAll(listQuetes);
-					loreFinal.add("");
-					loreFinal.add("");
-					loreFinal.add("§eClique gauche:");
-					loreFinal.add("§7Une fois toutes les quêtes terminer,");
-					loreFinal.add("§7Vous pourrez ouvrir l'inventaire des récompenses");
-					loreFinal.add("");
-					loreFinal.add("§aClique droit: §7Pour déplacer l'item");
-	
 					itemBuilder.setBooleanTag("actived", true);
-	
-					for (String id : configuration.getConfigurationSection("Quetes").getKeys(false))
-					{
-						itemBuilder.setIntTag("quete_" + id, 0);
-					}
-	
-					itemBuilder.setName(item.getItemMeta().getDisplayName()).setLores(loreFinal).build();
-	
+					itemBuilder.setName(item.getItemMeta().getDisplayName()).setLores(ItemLore.update(itemBuilder, configuration)).build();
+					
 					event.getClickedInventory().setItem(event.getSlot(), itemBuilder.getItemStack());
 					player.sendMessage(this.prefix + "§7Activation du parchemin");
 				}
